@@ -9,16 +9,40 @@ import {TextLayer,ScatterplotLayer} from '@deck.gl/layers';
 import {CSVLoader} from '@loaders.gl/csv';
 import {H3ClusterLayer} from '@deck.gl/geo-layers';
 
-const heatmapLayer = new HeatmapLayer({
-  id: 'heatmap-layer',
-  data: [
-    { position: [3.5, 8], weight: 1 },
-    { position: [3.8, 7.7], weight: 2 },
-  ],
-  getPosition: d => d.position,
-  getWeight: d => d.weight,
-  pickable: true, // Enable picking for interaction
-});
+// const heatmapLayer = new HeatmapLayer({
+//   id: 'heatmap-layer',
+//   data: [
+//     { position: [3.5, 8], weight: 1 },
+//     { position: [3.8, 7.7], weight: 2 },
+//   ],
+//   getPosition: d => d.position,
+//   getWeight: d => d.weight,
+//   pickable: true, // Enable picking for interaction 
+// });
+
+function updateHeatmapLayer(year) {
+  // const heatmapData = getDataForYear(year);
+
+  const heatmapLayer = new HeatmapLayer({
+    id: 'heatmap-layer',
+  data: "heat_map_data.json",
+  // data: [
+  //       { coord: [3.5, 8], 2005: 1 },
+  //       { coord: [3.8, 7.7], 2005: 2 },
+  //     ],
+  getPosition: d => [d.coord[1], d.coord[0]],
+  getWeight: d => d[year],
+  updateTriggers: {
+    getWeight: year
+  },
+  pickable: true, // Enable picking for interaction 
+  })
+
+
+  deck.setProps({
+    layers: isLayerVisible ? [hex3layer,heatmapLayer,textlayer,] : [hex3layer,textlayer],
+  });
+}
 
     const hex3layer = new H3ClusterLayer({
       id: 'H3ClusterLayer',
@@ -55,7 +79,7 @@ const textlayer = new TextLayer({
       
       // loaders: [CSVLoader],
       extensions: [new CollisionFilterExtension()],
-      getCollisionPriority: d => d.tf_icf *10000 ^ 2,
+      getCollisionPriority: d => d.tf_icf *1000 ^ 2,
       // collisionTestProps: {radiusScale: 100},
 
       loadOptions: {
@@ -74,7 +98,7 @@ const textlayer = new TextLayer({
       pickable: true
     })
 
-new Deck({
+deck = new Deck({
   // mapStyle: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
 
   initialViewState: {
@@ -87,6 +111,33 @@ new Deck({
   },
   controller: true,
   
-  layers: [, hex3layer,layer,textlayer,heatmapLayer]
+  // layers: [, hex3layer,layer,textlayer,heatmapLayer]
+  layers: [, hex3layer,layer,textlayer]
 });
-  
+
+
+
+let selectedYear = 2025; // Default year
+let selectedYearprev = 2025; // prev val year
+let isLayerVisible = true; // State for toggling the layer
+
+updateHeatmapLayer(selectedYear);
+
+// Event Listener: Update the map when the year slider changes
+const yearSlider = document.getElementById('yearSlider');
+const selectedYearLabel = document.getElementById('selectedYear');
+
+yearSlider.addEventListener('input', (event) => {
+  selectedYear = event.target.value;
+  selectedYearLabel.textContent = selectedYear;
+  updateHeatmapLayer(selectedYear);
+});
+
+// Event Listener: Toggle the layer visibility
+const toggleLayerButton = document.getElementById('toggleLayerButton');
+
+toggleLayerButton.addEventListener('click', () => {
+  isLayerVisible = !isLayerVisible;
+  toggleLayerButton.textContent = isLayerVisible ? 'Turn Off Layer' : 'Turn On Layer';
+  updateHeatmapLayer(selectedYear);
+});

@@ -2,14 +2,56 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>deck.gl Example</title>
+  <title>Map of Papers</title>
   <style>
-    body {margin: 0; width: 100vw; height: 100vh; overflow: hidden;}
 
-    
+    body {
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .controls label {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .controls input[type="range"] {
+      width: 100%;
+      margin-top: 5px;
+    }
+
+    .controls button {
+      margin-top: 10px;
+      padding: 5px 10px;
+      font-size: 14px;
+      cursor: pointer;
+    }
   </style>
 </head>
-<body> </body>
+<body>
+  <div class="controls">
+    <label for="yearSlider">Select year for Terms activity</label>
+    <input type="range" id="yearSlider" min="2000" max="2025" step="1" value="2025">
+    <span id="selectedYear">2025</span>
+    <br>
+    <button id="toggleLayerButton">Turn Off Layer</button>
+  </div>
+</body>
 <script type="module" src="app.js"></script>
 
 </html>
