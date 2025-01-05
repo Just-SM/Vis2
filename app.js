@@ -32,8 +32,10 @@ function updateHeatmapLayer(year) {
   //     ],
   getPosition: d => [d.coord[1], d.coord[0]],
   getWeight: d => d[year],
+  radiusPixels: 60,
+  opacity: 0.7,
   updateTriggers: {
-    getWeight: year
+    getWeight: year,
   },
   pickable: true, // Enable picking for interaction 
   })
@@ -56,20 +58,6 @@ function updateHeatmapLayer(year) {
       pickable: true,
       opacity: 0.3,
   
-    });
-
-    const layer = new ScatterplotLayer({
-      id: 'ScatterplotLayer',
-      // data: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart-stations.json',
-      
-      stroked: true,
-      getPosition: d => d.coordinates,
-      getRadius: d => Math.sqrt(d.exits),
-      getFillColor: [255, 140, 0],
-      getLineColor: [0, 0, 0],
-      getLineWidth: 10,
-      radiusScale: 6,
-      pickable: true
     });
 
 const textlayer = new TextLayer({
@@ -112,13 +100,13 @@ deck = new Deck({
   controller: true,
   
   // layers: [, hex3layer,layer,textlayer,heatmapLayer]
-  layers: [, hex3layer,layer,textlayer]
+  layers: [, hex3layer,textlayer]
 });
 
 
 
-let selectedYear = 2025; // Default year
-let selectedYearprev = 2025; // prev val year
+let selectedYear = 2017; // Default year
+
 let isLayerVisible = true; // State for toggling the layer
 
 updateHeatmapLayer(selectedYear);
