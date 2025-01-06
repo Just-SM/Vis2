@@ -1,55 +1,73 @@
-/*
-* https://deck.gl/docs/api-reference/aggregation-layers/heatmap-layer
-*/
-
-import {Deck,} from '@deck.gl/core';
-import { HeatmapLayer } from '@deck.gl/aggregation-layers';
-import {CollisionFilterExtension} from '@deck.gl/extensions'
-import {TextLayer,ScatterplotLayer} from '@deck.gl/layers';
-import {CSVLoader} from '@loaders.gl/csv';
+import {Deck} from '@deck.gl/core';
+import {HeatmapLayer} from '@deck.gl/aggregation-layers';
+import {CollisionFilterExtension} from '@deck.gl/extensions';
+import {TextLayer} from '@deck.gl/layers';
 import {H3ClusterLayer} from '@deck.gl/geo-layers';
 
-// const heatmapLayer = new HeatmapLayer({
-//   id: 'heatmap-layer',
-//   data: [
-//     { position: [3.5, 8], weight: 1 },
-//     { position: [3.8, 7.7], weight: 2 },
-//   ],
-//   getPosition: d => d.position,
-//   getWeight: d => d.weight,
-//   pickable: true, // Enable picking for interaction 
-// });
+import {
+  ZOOM_SCALE_FACTOR,
+  ENABLE_MIN_MAX,
+  MIN_TEXT_SIZE,
+  MAX_TEXT_SIZE,
+  SCROLL_ZOOM_SPEED,
+  BASE_ZOOM_OFFSET,
+  INITIAL_VIEW_STATE,
+} from './config.js';
 
-function updateHeatmapLayer(year) {
-  // const heatmapData = getDataForYear(year);
-
-  const heatmapLayer = new HeatmapLayer({
-    id: 'heatmap-layer',
-  data: "heat_map_data.json",
-  // data: [
-  //       { coord: [3.5, 8], 2005: 1 },
-  //       { coord: [3.8, 7.7], 2005: 2 },
-  //     ],
-  getPosition: d => [d.coord[1], d.coord[0]],
-  getWeight: d => d[year],
-  radiusPixels: 60,
-  opacity: 0.7,
-  updateTriggers: {
-    getWeight: year,
+// Deck.gl instance
+let deck = new Deck({
+  initialViewState: INITIAL_VIEW_STATE,
+  controller: {
+    scrollZoom: {
+      speed: SCROLL_ZOOM_SPEED,
+      smooth: true,
+    },
+    doubleClickZoom: true,
+    dragPan: true,
   },
-  pickable: true, // Enable picking for interaction 
-  })
+  layers: [], // Initialize with no layers
+});
 
+// Layers
+let heatmapLayer = null;
+let hex3layer = null;
+let textlayer = null;
 
-  deck.setProps({
-    layers: isLayerVisible ? [hex3layer,heatmapLayer,textlayer,] : [hex3layer,textlayer],
-  });
+// State variables
+let selectedYear = 2017; // Default year
+let isHeatmapVisible = true; // Heatmap visibility
+let isHexVisible = true; // Hexagon visibility
+
+/**
+ * Function to create or update the HeatmapLayer dynamically
+ * @param {number} year - The selected year for the heatmap data
+ */
+function updateHeatmapLayer(year) {
+  if (isHeatmapVisible) {
+    heatmapLayer = new HeatmapLayer({
+      id: 'heatmap-layer',
+      data: './data/heat_map_data.json',
+      getPosition: d => [d.coord[1], d.coord[0]],
+      getWeight: d => d[year],
+      radiusPixels: 60,
+      opacity: 0.7,
+      updateTriggers: {getWeight: year},
+      pickable: true,
+    });
+  } else {
+    heatmapLayer = null;
+  }
+  updateLayers();
 }
 
-    const hex3layer = new H3ClusterLayer({
+/**
+ * Function to create or update the HexagonLayer
+ */
+function updateHexLayer() {
+  if (isHexVisible) {
+    hex3layer = new H3ClusterLayer({
       id: 'H3ClusterLayer',
-      data: 'hex_data.json',
-      
+      data: './data/hex_data.json',
       stroked: true,
       getHexagons: d => d.hexIds,
       getFillColor: d => [d.color[0], d.color[1], d.color[2]],
@@ -57,75 +75,112 @@ function updateHeatmapLayer(year) {
       lineWidthMinPixels: 2,
       pickable: true,
       opacity: 0.3,
-  
     });
+  } else {
+    hex3layer = null;
+  }
+  updateLayers();
+}
 
-const textlayer = new TextLayer({
+/**
+ * Function to create or update the TextLayer dynamically
+ * @param {object} viewState - The current view state of the Deck.gl instance
+ */
+function updateTextLayer(viewState) {
+  if (!textlayer) {
+    textlayer = new TextLayer({
       id: 'text',
+      sizeUnits: 'pixels', // Scale text size directly in screen-space
       parameters: {depthTest: false},
-      data: 'words_emb.json',
-      
-      // loaders: [CSVLoader],
+      data: './data/words_emb.json',
       extensions: [new CollisionFilterExtension()],
-      getCollisionPriority: d => d.tf_icf *1000 ^ 2,
-      // collisionTestProps: {radiusScale: 100},
-
-      loadOptions: {
-        csv: {
-          dynamicTyping: true,
-          skipEmptyLines: true,
-        },
-      },
-      
-      getPosition: d => [d.coord[0],d.coord[1]],
+      collisionEnabled: true,
+      getCollisionPriority: d => (d.tf_icf * 4000) ** 2,
+      getPosition: d => [d.coord[0], d.coord[1]],
+      getSize: d => (d.tf_icf * 3000) + 4, // Base size calculation
+      getColor: [70, 70, 70],
       getText: d => d.words,
-      // getAlignmentBaseline: 'center',
-      getColor: [70,70, 70],
-      getSize:  d => (d.tf_icf * 3000) +10 ,
-      // getTextAnchor: 'middle',
-      pickable: true
-    })
+      pickable: true,
+    });
+  }
 
-deck = new Deck({
-  // mapStyle: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+  // Update text size based on zoom
+  const updatedTextLayer = textlayer.clone({
+    getSize: d => {
+      const baseSize = (d.tf_icf * 3000) + 4;
+      // Scale the text size based on zoom level
+      const scaledSize = baseSize * Math.pow(
+        2,
+        ZOOM_SCALE_FACTOR * (viewState.zoom - BASE_ZOOM_OFFSET)
+      );
+      return scaledSize;
+    },
+    getText: d => {
+      const baseSize = (d.tf_icf * 3000) + 4;
+      const scaledSize = baseSize * Math.pow(
+        2,
+        ZOOM_SCALE_FACTOR * (viewState.zoom - BASE_ZOOM_OFFSET)
+      );
 
-  initialViewState: {
-    longitude: 3.5,
-    latitude: 8,
-    zoom: 6.5,
-    maxZoom: 20,
-    pitch: 30,
-    bearing: 0
-  },
-  controller: true,
-  
-  // layers: [, hex3layer,layer,textlayer,heatmapLayer]
-  layers: [, hex3layer,textlayer]
-});
+      // Hide text if it falls outside the specified size range
+      if (ENABLE_MIN_MAX) {
+        if (scaledSize < MIN_TEXT_SIZE) return '';
+        if (scaledSize > MAX_TEXT_SIZE) return '';
+      }
+      return d.words;
+    },
+  });
 
+  textlayer = updatedTextLayer;
+}
 
+/**
+ * Function to update all layers based on current state
+ */
+function updateLayers(viewState) {
+  const layers = [];
+  if (isHexVisible && hex3layer) layers.push(hex3layer);
+  if (isHeatmapVisible && heatmapLayer) layers.push(heatmapLayer);
+  if (textlayer) layers.push(textlayer);
+  deck.setProps({ layers });
+}
 
-let selectedYear = 2017; // Default year
+// Initialize Hexagon Layer
+updateHexLayer();
 
-let isLayerVisible = true; // State for toggling the layer
+// Initialize Text Layer
+updateTextLayer(deck.viewState);
 
+// Initial Heatmap Update
 updateHeatmapLayer(selectedYear);
 
-// Event Listener: Update the map when the year slider changes
+// Slider for selecting the year
 const yearSlider = document.getElementById('yearSlider');
 const selectedYearLabel = document.getElementById('selectedYear');
-
-yearSlider.addEventListener('input', (event) => {
+yearSlider.addEventListener('input', event => {
   selectedYear = event.target.value;
   selectedYearLabel.textContent = selectedYear;
   updateHeatmapLayer(selectedYear);
 });
 
-// Event Listener: Toggle the layer visibility
-const toggleLayerButton = document.getElementById('toggleLayerButton');
-
-toggleLayerButton.addEventListener('click', () => {
-  isLayerVisible = !isLayerVisible;
-  toggleLayerButton.textContent = isLayerVisible ? 'Turn Off Layer' : 'Turn On Layer';
+// Heatmap Toggle
+const heatmapToggle = document.getElementById('heatmapToggle');
+heatmapToggle.addEventListener('change', event => {
+  isHeatmapVisible = event.target.checked;
   updateHeatmapLayer(selectedYear);
+});
+
+// Hexagon Toggle
+const hexToggle = document.getElementById('hexToggle');
+hexToggle.addEventListener('change', event => {
+  isHexVisible = event.target.checked;
+  updateHexLayer();
+});
+
+// Handle view state changes for dynamic text sizing
+deck.setProps({
+  onViewStateChange: ({viewState}) => {
+    updateTextLayer(viewState);
+    updateLayers(viewState);
+  },
 });

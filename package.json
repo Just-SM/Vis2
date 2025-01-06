@@ -9,10 +9,12 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@deck.gl/aggregation-layers": "^9.0.38",
     "@deck.gl/core": "^9.0.38",
+    "@deck.gl/geo-layers": "^9.0.38",
     "@deck.gl/layers": "^9.0.38",
     "@loaders.gl/csv": "^4.3.3",
-    "deck.gl": "^9.0.0",
+    "deck.gl": "^9.0.38",
     "loaders.gl": "^0.3.5"
   },
   "devDependencies": {
