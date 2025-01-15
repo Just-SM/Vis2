@@ -50,7 +50,7 @@ function updateHeatmapLayer(year) {
       getPosition: d => [d.coord[1], d.coord[0]],
       getWeight: d => d[year],
       radiusPixels: 60,
-      opacity: 0.7,
+      opacity: 0.4,
       updateTriggers: {getWeight: year},
       pickable: true,
     });
@@ -74,7 +74,7 @@ function updateHexLayer() {
       getLineColor: [255, 255, 255],
       lineWidthMinPixels: 2,
       pickable: true,
-      opacity: 0.3,
+      opacity: 0.2,
     });
   } else {
     hex3layer = null;
