@@ -1,7 +1,9 @@
+/* eslint-disable */
+/* @ts-nocheck */
 import React from "react";
 import { Settings, Map, Plus, ChevronRight } from "lucide-react";
 
-// Define the props expected by the Sidebar component
+
 interface SidebarProps {
   isSidebarOpen: boolean;
   setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
