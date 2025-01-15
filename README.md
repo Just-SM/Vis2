@@ -50,7 +50,7 @@ Prominent features
 
 ![alt text](Vis2.png)
 
-### How to run
+### How to run Advanced ReTVis
 
 In one console open:
 
