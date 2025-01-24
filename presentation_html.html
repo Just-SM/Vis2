@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vis2 Project</title>
+    <!-- Minified version -->
+    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+</head>
+<body>
+    <!-- <article> -->
+    <h1>Maps of Computer Science</h1>
+
+    <img src="https://raw.githubusercontent.com/Just-SM/Vis2/refs/heads/main/Vis2.png" alt="Map of CS Screenshot">
+
+   
+            <h2>Authors</h2>
+            <ul>
+                <li>Paul Scheipner 11912794</li>
+                <li>Roman Furzykov 12326229</li>
+            </ul>
+            <p>
+
+                Code: <a href="https://github.com/Just-SM/Vis2" target="_blank">GitHub</a>
+            </p>
+    
+    <section>
+        <H3> Based on</H3>
+        <p>D. Fried and S. G. Kobourov, "Maps of Computer Science,"</p>
+        <p>
+            The original paper:  <a href="http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6787157" target="_blank">Maps of Computer Science</a>.
+        </p>
+            <b>
+                Abstract:
+            </b>
+            A practical approach for visual exploration of research papers. Specifically, we use the titles of papers from the DBLP database to create what we call maps of computer science (MoCS)
+    </section>
+
+    <section>
+        <h3>Our contributions</h3>
+
+        <h4>Base map</h4>
+
+            <ul>
+                <li> <d style="color:orange;">✓</d> Represent word similarity with actual distance (Word2Vec)</li>
+                <li><d style="color:orange;">✓</d>  Make the map ”zoomable” (Next.js)</li>
+                <li> <d style="color:orange;">✓</d> Reduce clutter by loading words only once they are a certain size (Next.js)</li>
+                <li><d style="color:orange;">✓</d> Use UMAP’s features instead of Collision detection </li>
+                <li><d style="color:orange;">✓</d> Split data into Groups based on TF-IDF </li>
+            </ul>
+
+        <h4>Heat Map</h4>
+
+            <ul>
+                <li><d style="color:orange;">✓</d> Make it represent “actual” semantic meaning  (UMAP + TF-IDF bins)</li>
+                <li><d style="color:orange;">✓</d> The Real Time Part: Make the TF-IDF applicable on new Documents (Real Time Computation with FastAPI)</li>
+                <li><d style="color:orange;">✓</d> Use pretrained Word2Vec model instead of training for each input (also better results) </li>
+            </ul>   
+                
+
+
+    </section>
+    <section>
+        <h3>Our pipeline</h3>
+        
+        <p>The new general pipeline is following: </p>
+        
+        <p class="notice">Text corpus -> POS Filtering -> TFIDF calculation and filtering -> Embed to vector space by Word2Vec -> UMAP.</p>
+    </section>
+    <section>
+        <h3>Technologies</h3>
+        <ul>
+            <li>Python</li>
+            <li>JavaScript</li>
+            <li>Next.js</li>
+            <li>FastAPI</li>
+            <li>Word2Vec</li>
+            <li>UMAP</li>
+        </ul>
+    </section>
+
+    <section>
+        <h3>How to run</h3>
+        <p>In one console open:</p>
+        <aside>
+            <p>And wait for downloading.</p>
+        </aside>
+        Go to <b>rtvis/python</b>
+        <blockquote>py main.py</blockquote>
+
+        <p>In second console:</p>
+        <p>
+            Go to <b>rtvis</b>
+        </p>
+        <p>
+
+            <blockquote>npm install </blockquote>
+        </p>
+        <p>
+
+            <blockquote> npm run dev</blockquote>
+        </p>
+
+    </section>
+
+    <section>
+        <h3>Gallery</h3>
+        <img src="https://raw.githubusercontent.com/Just-SM/Vis2/refs/heads/main/Vis2.png" alt="Map of CS Screenshot">
+        <p></p>
+        <img src="https://raw.githubusercontent.com/Just-SM/Vis2/refs/heads/main/vis4.png" alt="Map of CS Screenshot">
+        <p></p>
+        <img src="https://raw.githubusercontent.com/Just-SM/Vis2/refs/heads/main/vis3.png" alt="Map of CS Screenshot">
+
+    </section>
+    
+<!-- </article> -->
+</body>
+</html>
